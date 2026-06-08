@@ -1,0 +1,17 @@
+[
+  {
+    "name": "title",
+    "type": "string",
+    "description": "Title"
+  },
+  {
+    "name": "publish_time",
+    "type": "string",
+    "description": "Publish Time"
+  },
+  {
+    "name": "category",
+    "type": "string",
+    "description": "Category"
+  }
+]

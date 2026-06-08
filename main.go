@@ -5,153 +5,154 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"os"
-	"strings"
-	coresdk "test/GoSdk"
 	"time"
+
+	coresdk "test/GoSdk"
 )
 
-func run() {
+func main() {
 	ctx := context.Background()
 
 	time.Sleep(2 * time.Second)
 	coresdk.Log.Info(ctx, "golang gRPC SDK client started......")
 
-	// 1. 获取输入参数
+	// 1. Get input parameters
 	inputJSON, err := coresdk.Parameter.GetInputJSONString(ctx)
 	if err != nil {
-		coresdk.Log.Error(ctx, fmt.Sprintf("获取输入参数失败: %v", err))
+		coresdk.Log.Error(ctx, fmt.Sprintf("Failed to get input parameters: %v", err))
 		return
 	}
-	coresdk.Log.Debug(ctx, fmt.Sprintf("输入参数: %s", inputJSON))
+	coresdk.Log.Debug(ctx, fmt.Sprintf("Input parameters: %s", inputJSON))
 
-	// 2. 获取代理配置（从环境变量读取，支持灵活部署）
+	// 2. Read and log all input fields (demonstrating 11 editor types)
+	var inputMap map[string]interface{}
+	json.Unmarshal([]byte(inputJSON), &inputMap)
+
+	urls, _ := inputMap["urls"].([]interface{})
+	sources, _ := inputMap["sources"].([]interface{})
+	searchTerms, _ := inputMap["searchTerms"].([]interface{})
+	location, _ := inputMap["location"].(string)
+	notes, _ := inputMap["notes"].(string)
+	maxResults := 100
+	if v, ok := inputMap["max_results"].(float64); ok {
+		maxResults = int(v)
+	}
+	language, _ := inputMap["language"].(string)
+	category := 1
+	if v, ok := inputMap["category"].(float64); ok {
+		category = int(v)
+	}
+	dataSections, _ := inputMap["data_sections"].([]interface{})
+	skipClosed := false
+	if v, ok := inputMap["skip_closed"].(bool); ok {
+		skipClosed = v
+	}
+	sinceDate, _ := inputMap["since_date"].(string)
+
+	coresdk.Log.Info(ctx, fmt.Sprintf("[requestList] urls: %v", urls))
+	coresdk.Log.Info(ctx, fmt.Sprintf("[requestListSource] sources: %v", sources))
+	coresdk.Log.Info(ctx, fmt.Sprintf("[stringList] searchTerms: %v", searchTerms))
+	coresdk.Log.Info(ctx, fmt.Sprintf("[input] location: %s", location))
+	coresdk.Log.Info(ctx, fmt.Sprintf("[textarea] notes: %s", notes))
+	coresdk.Log.Info(ctx, fmt.Sprintf("[number] max_results: %d", maxResults))
+	coresdk.Log.Info(ctx, fmt.Sprintf("[select] language: %s", language))
+	coresdk.Log.Info(ctx, fmt.Sprintf("[radio] category: %d", category))
+	coresdk.Log.Info(ctx, fmt.Sprintf("[checkbox] data_sections: %v", dataSections))
+	coresdk.Log.Info(ctx, fmt.Sprintf("[switch] skip_closed: %v", skipClosed))
+	coresdk.Log.Info(ctx, fmt.Sprintf("[datepicker] since_date: %s", sinceDate))
+
+	// 3. Proxy configuration (read from environment variables)
 	proxyDomain := os.Getenv("PROXY_DOMAIN")
-	coresdk.Log.Info(ctx, fmt.Sprintf("代理域名: %s", proxyDomain))
+	coresdk.Log.Info(ctx, fmt.Sprintf("Proxy domain: %s", proxyDomain))
 
 	var proxyAuth string
 	proxyAuth = os.Getenv("PROXY_AUTH")
-	coresdk.Log.Info(ctx, fmt.Sprintf("代理认证信息: %s", proxyAuth))
+	coresdk.Log.Info(ctx, fmt.Sprintf("Proxy authentication: %s", proxyAuth))
 
-	// 3. 拼接代理 URL
+	// 4. Construct proxy URL
 	var proxyURL string
 	if proxyAuth != "" {
 		proxyURL = fmt.Sprintf("socks5://%s@%s", proxyAuth, proxyDomain)
 	}
-	coresdk.Log.Info(ctx, fmt.Sprintf("代理地址: %s", proxyURL))
+	coresdk.Log.Info(ctx, fmt.Sprintf("Proxy URL: %s", proxyURL))
 
-	// 4. 业务逻辑处理（示例）
-	coresdk.Log.Info(ctx, "开始处理业务逻辑")
-
-	// 创建自定义 HTTP 客户端，支持代理
+	// 5. Business logic - create HTTP client with proxy
 	httpClient := &http.Client{
-		Timeout: time.Second * 30, // 设置超时时间
+		Timeout: time.Second * 30,
 	}
 
-	// 如果配置了代理，设置代理传输层
 	if proxyURL != "" {
-		// 解析代理URL
 		proxyParsed, err := url.Parse(proxyURL)
 		if err != nil {
-			coresdk.Log.Error(ctx, fmt.Sprintf("解析代理URL失败: %v", err))
+			coresdk.Log.Error(ctx, fmt.Sprintf("Failed to parse proxy URL: %v", err))
 			return
 		}
 
-		// 创建带代理的传输层
 		httpClient.Transport = &http.Transport{
 			Proxy: http.ProxyURL(proxyParsed),
 			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true, // 仅测试使用，生产环境应配置正确的证书
+				InsecureSkipVerify: true,
 			},
 		}
-
-		coresdk.Log.Info(ctx, "已配置代理客户端")
+		coresdk.Log.Info(ctx, "Proxy client configured")
 	}
 
-	// 发送请求到 ipinfo.io
-	targetURL := "https://ipinfo.io/ip"
-	req, err := http.NewRequestWithContext(ctx, "GET", targetURL, nil)
+	// 6. Set table headers
+	headers := []*coresdk.TableHeaderItem{
+		{Label: "Primary Key", Key: "id", Format: "text"},
+		{Label: "Title", Key: "title", Format: "text"},
+		{Label: "Description", Key: "description", Format: "text"},
+	}
+
+	_, err = coresdk.Result.SetTableHeader(ctx, headers)
 	if err != nil {
-		coresdk.Log.Error(ctx, fmt.Sprintf("创建请求失败: %v", err))
+		coresdk.Log.Error(ctx, fmt.Sprintf("Set table header failed: %v", err))
 		return
 	}
 
-	coresdk.Log.Info(ctx, fmt.Sprintf("开始请求: %s", targetURL))
+	// 7. Push data in batches (limited by maxResults)
+	batchSize := 100
+	sleepSeconds := 1
 
-	// 发送请求
-	resp, err := httpClient.Do(req)
-	if err != nil {
-		coresdk.Log.Error(ctx, fmt.Sprintf("请求失败: %v", err))
-		return
-	}
-	defer resp.Body.Close()
+	for index := 1; index <= maxResults; index++ {
+		data := map[string]any{
+			"id":          fmt.Sprintf("test-%d", index),
+			"title":       fmt.Sprintf("Test Title %d", index),
+			"description": fmt.Sprintf("This is test description number %d", index),
+		}
 
-	coresdk.Log.Info(ctx, fmt.Sprintf("响应状态码: %d", resp.StatusCode))
-
-	// 读取响应体
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		coresdk.Log.Error(ctx, fmt.Sprintf("读取响应失败: %v", err))
-		return
-	}
-
-	// 打印返回的IP地址
-	ip := strings.TrimSpace(string(body))
-	coresdk.Log.Info(ctx, fmt.Sprintf("当前IP地址: %s", ip))
-
-	// 如果需要JSON格式输出，可以使用更结构化的方式
-	coresdk.Log.Info(ctx, "业务逻辑处理完成")
-
-	type result struct {
-		Title   string `json:"title"`
-		Content string `json:"content"`
-	}
-
-	resultData := []result{
-		{Title: "实列标题1", Content: "实列内容1"},
-		{Title: "实列标题2", Content: "实列内容2"},
-	}
-
-	// 5. 推送结果数据
-
-	for _, datum := range resultData {
-		jsonBytes, _ := json.Marshal(datum)
-
-		res, err := coresdk.Result.PushData(ctx, string(jsonBytes))
+		_, err = coresdk.Result.UpsertData(ctx, data, "id")
 		if err != nil {
-			coresdk.Log.Error(ctx, fmt.Sprintf("推送数据失败: %v", err))
+			coresdk.Log.Error(ctx, fmt.Sprintf("Upsert data failed: %v", err))
 			return
 		}
-		fmt.Printf("PushData Response: %+v\n", res)
+
+		if index%batchSize == 0 {
+			coresdk.Log.Info(ctx, fmt.Sprintf("Pushed %d items", index))
+			if index < maxResults {
+				time.Sleep(time.Duration(sleepSeconds) * time.Second)
+			}
+		}
 	}
 
-	// 6. 设置表格表头
-	headers := []*coresdk.TableHeaderItem{
-		{
-			Label:  "标题",
-			Key:    "title",
-			Format: "text",
-		},
-		{
-			Label:  "内容",
-			Key:    "content",
-			Format: "text",
-		},
+	coresdk.Log.Info(ctx, "Starting second push for multiples of 3")
+	for index := 3; index <= maxResults; index += 3 {
+		data := map[string]any{
+			"id":          fmt.Sprintf("test-%d", index),
+			"title":       fmt.Sprintf("Test Title %d", index),
+			"description": fmt.Sprintf("This is updated test description number %d after second push", index),
+		}
+
+		_, err = coresdk.Result.UpsertData(ctx, data, "id")
+		if err != nil {
+			coresdk.Log.Error(ctx, fmt.Sprintf("Upsert data failed: %v", err))
+			return
+		}
 	}
 
-	res, err := coresdk.Result.SetTableHeader(ctx, headers)
-	if err != nil {
-		coresdk.Log.Error(ctx, fmt.Sprintf("设置表头失败: %v", err))
-		return
-	}
-	fmt.Printf("SetTableHeader Response: %+v\n", res)
-
-	coresdk.Log.Info(ctx, "脚本执行完成")
-}
-
-func main() {
-	run()
+	coresdk.Log.Info(ctx, "Second push for multiples of 3 completed")
+	coresdk.Log.Info(ctx, "Script execution completed")
 }

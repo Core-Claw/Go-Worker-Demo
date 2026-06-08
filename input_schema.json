@@ -1,22 +1,169 @@
 {
-  "description": "With our Instagram Reel information scraper tool, after a successful scrape, you can extract the Reel author's username, Reel caption, hashtags used in the post, number of comments on the Reel, Reel publish date, likes count, views count, play count, popular comments, unique post identifier, URL of the Reel's display image or video thumbnail, product type, Reel duration, video URL, post audio link, number of posts on the profile, number of followers on the profile, profile URL, whether the account is a paid partner, and other relevant information. Currently, the tool can scrape via Instagram username, URL, and other methods, and the scrape results can be downloaded in various structured formats.",
-  "b": "url",
+  "description": "Worker Input Editor Test Demo. This Worker demonstrates all 11 supported input editor types: input, textarea, number, select, radio, checkbox, switch, datepicker, requestList, requestListSource, and stringList.",
+  "b": "urls",
   "properties": [
     {
-      "title": "URL",
-      "name": "url",
+      "title": "URL List (requestList)",
+      "name": "urls",
       "type": "array",
       "editor": "requestList",
-      "description": "This parameter is used to specify the Instagram access URL to be fetched.",
+      "description": "Batch input for page links to scrape",
       "default": [
         {
-          "url": "https://www.instagram.com/reel/C5Rdyj_q7YN/"
+          "url": "https://example.com/page1"
         },
         {
-          "url": "https://www.instagram.com/reel/C85BZjeSHuO"
+          "url": "https://example.com/page2"
         }
       ],
       "required": true
+    },
+    {
+      "title": "URL Source (requestListSource)",
+      "name": "sources",
+      "type": "array",
+      "editor": "requestListSource",
+      "description": "URL request source with extra parameters",
+      "default": [
+        {
+          "url": "https://example.com/source1",
+          "num_of_posts": "10"
+        }
+      ],
+      "param_list": [
+        {
+          "param": "url",
+          "title": "URL",
+          "required": true,
+          "description": "The URL to scrape"
+        },
+        {
+          "param": "num_of_posts",
+          "title": "Maximum Posts",
+          "description": "Maximum number of posts to fetch"
+        }
+      ]
+    },
+    {
+      "title": "Search Terms (stringList)",
+      "name": "searchTerms",
+      "type": "array",
+      "editor": "stringList",
+      "description": "Batch input for multiple keywords",
+      "default": [
+        {
+          "string": "restaurant"
+        },
+        {
+          "string": "cafe"
+        }
+      ]
+    },
+    {
+      "title": "Location (input)",
+      "name": "location",
+      "type": "string",
+      "editor": "input",
+      "description": "Short text input example",
+      "default": "New York, USA"
+    },
+    {
+      "title": "Notes (textarea)",
+      "name": "notes",
+      "type": "string",
+      "editor": "textarea",
+      "description": "Multi-line text input example"
+    },
+    {
+      "title": "Max Results (number)",
+      "name": "max_results",
+      "type": "integer",
+      "editor": "number",
+      "description": "Number input example",
+      "default": 100
+    },
+    {
+      "title": "Language (select)",
+      "name": "language",
+      "type": "string",
+      "editor": "select",
+      "description": "Dropdown select example",
+      "options": [
+        {
+          "label": "English",
+          "value": "en"
+        },
+        {
+          "label": "Chinese",
+          "value": "zh"
+        },
+        {
+          "label": "Japanese",
+          "value": "ja"
+        }
+      ],
+      "default": "en"
+    },
+    {
+      "title": "Category (radio)",
+      "name": "category",
+      "type": "integer",
+      "editor": "radio",
+      "description": "Radio group example",
+      "options": [
+        {
+          "label": "Hotel",
+          "value": 1
+        },
+        {
+          "label": "Restaurant",
+          "value": 2
+        },
+        {
+          "label": "Cafe",
+          "value": 3
+        }
+      ],
+      "default": 1
+    },
+    {
+      "title": "Data Sections (checkbox)",
+      "name": "data_sections",
+      "type": "array",
+      "editor": "checkbox",
+      "description": "Checkbox set example",
+      "options": [
+        {
+          "label": "Reviews",
+          "value": "reviews"
+        },
+        {
+          "label": "Address",
+          "value": "address"
+        },
+        {
+          "label": "Phone Number",
+          "value": "phone_number"
+        }
+      ],
+      "default": ["reviews", "address"]
+    },
+    {
+      "title": "Skip Closed (switch)",
+      "name": "skip_closed",
+      "type": "boolean",
+      "editor": "switch",
+      "description": "Toggle switch example",
+      "default": false
+    },
+    {
+      "title": "Since Date (datepicker)",
+      "name": "since_date",
+      "type": "string",
+      "editor": "datepicker",
+      "description": "Date picker example",
+      "format": "DD/MM/YYYY",
+      "valueFormat": "DD/MM/YYYY"
     }
   ]
 }

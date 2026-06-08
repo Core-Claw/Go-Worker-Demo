@@ -12,8 +12,8 @@
 ├── go.sum
 ├── GoSdk
 ├────sdk.go
-├────sdk.pd.go
-├────sdk_grpc.pd.go
+├────sdk.pb.go
+├────sdk_grpc.pb.go
 
 ```
 
@@ -24,8 +24,8 @@
 | **input_schema.json** | UI input form configuration file |
 | **README.md** | Project documentation |
 | **sdk.go** | SDK basic functionality, located in GoSdk directory |
-| **sdk_pd.go** | Data processing enhancement module, located in GoSdk directory |
-| **sdk_grpc.pd.go** | Network communication module, located in GoSdk directory |
+| **sdk.pb.go** | Data processing enhancement module, located in GoSdk directory |
+| **sdk_grpc.pb.go** | Network communication module, located in GoSdk directory |
 
 ### Go scripts need to be built into an executable file before uploading to the script marketplace
 ```shell
@@ -44,8 +44,8 @@ The following three SDK files are essential. Place them in the **root directory*
 | **File Name** | **Main Function** |
 | --- | --- |
 | `sdk.go` | Basic functionality module |
-| `sdk_pd.go` | Data processing enhancement module |
-| `sdk_grpc.pd.py` | Network communication module |
+| `sdk.pb.go` | Data processing enhancement module |
+| `sdk_grpc.pb.go` | Network communication module |
 
 These three files form the script’s “toolbox,” providing all the core functions needed to interact with the backend system and run the scraper.
 ## 🔧 Core Function Usage
